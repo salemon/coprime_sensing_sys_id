@@ -237,8 +237,11 @@ legend('Sensor 1 (n_1=3)', 'Sensor 2 (n_2=5)', 'Location', 'best');
 subplot(3,2,3);
 semilogx(freq_Hz, mag_true, 'k-', 'LineWidth', 2); hold on;
 semilogx(freq_Hz, mag_id, 'r--', 'LineWidth', 1.5);
-xline(Fs/(2*n1), 'b:', 'LineWidth', 1.5, 'Label', sprintf('Nyq_{s1} %.0fHz', Fs/(2*n1)));
-xline(Fs/(2*n2), 'g:', 'LineWidth', 1.5, 'Label', sprintf('Nyq_{s2} %.0fHz', Fs/(2*n2)));
+yl = ylim;
+line([Fs/(2*n1) Fs/(2*n1)], yl, 'Color', 'b', 'LineStyle', ':', 'LineWidth', 1.5);
+text(Fs/(2*n1), yl(2), sprintf('Nyq_{s1} %.0fHz', Fs/(2*n1)), 'FontSize', 8);
+line([Fs/(2*n2) Fs/(2*n2)], yl, 'Color', 'g', 'LineStyle', ':', 'LineWidth', 1.5);
+text(Fs/(2*n2), yl(2), sprintf('Nyq_{s2} %.0fHz', Fs/(2*n2)), 'FontSize', 8);
 grid on;
 xlabel('Frequency (Hz)');
 ylabel('Magnitude (dB)');
@@ -256,10 +259,14 @@ xlim([freq_Hz(1), freq_Hz(end)]);
 
 % Plot 5: Pole-zero map
 subplot(3,2,5);
-pzmap(sys_discrete, 'b'); hold on;
-pzmap(sys_identified, 'r');
+p_true = pole(sys_discrete); p_id = pole(sys_identified);
+theta = linspace(0, 2*pi, 100);
+plot(cos(theta), sin(theta), 'k--'); hold on;
+plot(real(p_true), imag(p_true), 'bx', 'MarkerSize', 10, 'LineWidth', 2);
+plot(real(p_id), imag(p_id), 'ro', 'MarkerSize', 8, 'LineWidth', 2);
+axis equal; grid on;
 title('Pole-Zero Map');
-legend('True', 'Identified', 'Location', 'best');
+legend('Unit Circle', 'True', 'Identified', 'Location', 'best');
 
 % Plot 6: Error analysis
 subplot(3,2,6);
