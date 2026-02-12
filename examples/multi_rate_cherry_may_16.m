@@ -3,7 +3,8 @@ clc; close all; clear;
 
 % DC motor test using minimum segment length
 % Load the sweep signal data
-m_data = load('./Model Data/prbs_run_1.mat');
+tmp = load('./Model Data/prbs_run_1.mat');
+m_data = tmp.m_data;
 
 % ==============user change variables ============================
 % n4SID orders
