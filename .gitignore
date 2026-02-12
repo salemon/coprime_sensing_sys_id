@@ -1,0 +1,22 @@
+# MATLAB/Octave
+*.asv
+*.m~
+*.mex*
+*.mlappinstall
+*.mlpkginstall
+slprj/
+*.slxc
+
+# Simulink
+*.slx.r*
+
+# Generated data
+Model Data/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
