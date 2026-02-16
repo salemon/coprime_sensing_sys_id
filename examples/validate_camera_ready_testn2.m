@@ -2,9 +2,9 @@
 % This code is associated with the file "models_multirate_data_example_2022b.slx", which contains Simulink blocks.
 % To use this code, make sure to add the "macs-matlab-toolbox-master" to the Matlab path.
 % Authors: Bob Xiaohai Hu (huxh@uw.edu), Thomas Chu(tchu@uw.edu), X. Chen (chx@uw.edu), UW Mechanical Eng department
-
-%this version is after review, for test if two slow sensor could beats one
-%fast sensor (sampling period 2T, 3T，5T
+% Last updated: 2026-02-15
+% This version is after review. Test whether two slow sensors can outperform one fast sensor.
+% Sampling periods: 2T, 3T, and 5T.
 
 clf, clear all, close all
 Fs = 1024;
@@ -85,7 +85,7 @@ x = prbs_8_1_scal1;             % simulation input (real)
 t = 0:1/Fs:(length(x)-1)/Fs;    % simulation time
 t = t(:);
 StopTime = t(end);
-simdata = sim('models_multirate_data_example_2022b2d');
+simdata = sim('models_multirate_data_example_2022b2');
 % Simulation
 % Apply zero-order hold (ZOH) to the input signal x
 Ts_zoh = m * 1 / Fs;  % ZOH time period
