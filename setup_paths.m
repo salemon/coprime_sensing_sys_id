@@ -2,7 +2,7 @@
 %
 % Run this script once before running any example:
 %   >> setup_paths
-%   >> test_multirate_simple
+%   >> validate_camera_ready_testn2
 
 root = fileparts(mfilename('fullpath'));
 addpath(fullfile(root, 'src'));
