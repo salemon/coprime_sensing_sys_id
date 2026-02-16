@@ -70,6 +70,12 @@ coprime_sensing_sys_id/
 │   ├── blkhank.m                            #   Block Hankel matrix builder
 │   └── create_prbs.m                        #   PRBS signal generator
 │
+├── utils/                                   # Plotting & analysis helpers
+│   ├── m_freq_resp_cal.m                    #   Frequency response via spectral analysis
+│   ├── specCale.m                           #   FFT spectrum calculation
+│   ├── xbode.m                              #   Custom Bode plot
+│   └── xbodeplot.m                          #   Multi-system Bode wrapper
+│
 ├── examples/                                # Runnable demos
 │   ├── validate_camera_ready_testn2.m       #   Paper figs: 1-sensor vs 2-sensor
 │   ├── validate_order_nmp.m                 #   Non-minimum-phase validation

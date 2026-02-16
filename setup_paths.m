@@ -6,5 +6,6 @@
 
 root = fileparts(mfilename('fullpath'));
 addpath(fullfile(root, 'src'));
+addpath(fullfile(root, 'utils'));
 addpath(fullfile(root, 'examples'));
 fprintf('Paths added.\n');
