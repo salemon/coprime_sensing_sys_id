@@ -8,19 +8,54 @@ State-space system identification **beyond the Nyquist frequency** using collabo
 
 ## How It Works
 
-Two slow sensors with coprime downsampling factors `n1` and `n2` (where `gcd(n1,n2) = 1`) can collaboratively identify faster dynamics than either sensor alone.
+Two slow sensors with coprime downsampling factors `n1` and `n2` (where `gcd(n1,n2) = 1`) collaboratively identify system dynamics **beyond their individual Nyquist frequencies**.
 
-```
-Sensor 1 (n1=3):  Nyquist = Fs/(2*n1) = 170.7 Hz
-Sensor 2 (n2=5):  Nyquist = Fs/(2*n2) = 102.4 Hz
-Collaborative:    Nyquist = Fs/(2*m)   = 256.0 Hz   <-- beyond both!
-```
+The non-uniform sampling pattern created by coprime factors produces a combined data stream equivalent to a much faster effective rate:
+
+<p align="center">
+  <img src="images/nonuniform_sample_signal.png" width="700" alt="Non-uniform sampling from two coprime sensors"/>
+</p>
+
+The multirate system is modeled using a **lifting transformation** that converts the problem into a single-rate framework amenable to standard subspace identification:
+
+<p align="center">
+  <img src="images/block_lifted_multirate_sampled_sys.png" width="700" alt="Block diagram of lifted multirate system"/>
+</p>
 
 **Algorithm pipeline:**
 
-1. **Lifting** -- reshape multirate data into a single-rate lifted system
-2. **N4SID** -- subspace identification on the lifted data
-3. **Recovery** -- extract the fast single-rate model via eigenvalue decomposition
+1. **Lifting** -- reshape multirate sensor data into a single-rate lifted system
+2. **N4SID** -- subspace identification on the lifted data (with automatic order selection)
+3. **Recovery** -- extract the fast single-rate model via eigenvalue decomposition of the lifted system matrices
+
+---
+
+## Results
+
+### One sensor fails beyond its Nyquist limit
+
+A single slow sensor (sampling at period `n1*T`) cannot identify dynamics above its Nyquist frequency `Fs/(2*n1)`. The estimated Bode plot diverges from the true system:
+
+<p align="center">
+  <img src="images/one_sensor_fail.jpg" width="500" alt="One sensor fails beyond Nyquist"/>
+</p>
+
+### Two coprime sensors succeed
+
+Two sensors with coprime factors (`n1=3`, `n2=5`) collaboratively identify the system accurately up to `Fs/(2*m)`, well beyond either sensor's individual Nyquist limit:
+
+<p align="center">
+  <img src="images/two_sensor_success.jpg" width="500" alt="Two coprime sensors succeed"/>
+</p>
+
+### Non-minimum-phase system validation
+
+The algorithm also works on higher-order non-minimum-phase systems. One sensor fails (left), two coprime sensors succeed (right):
+
+<p align="center">
+  <img src="images/test_3_sensors_1.png" width="420" alt="NMP system: one sensor fails"/>
+  <img src="images/test_3_sensors_2.png" width="420" alt="NMP system: two sensors succeed"/>
+</p>
 
 ---
 
@@ -28,33 +63,27 @@ Collaborative:    Nyquist = Fs/(2*m)   = 256.0 Hz   <-- beyond both!
 
 ```
 coprime_sensing_sys_id/
-├── setup_paths.m                  # Run first: adds all folders to path
+├── setup_paths.m                            # Run first: adds folders to path
 │
-├── src/                           # Core algorithm
-│   ├── n4sidkatamodar.m           #   Modified N4SID (fixed order)
-│   ├── n4sidkatamodar_TC.m        #   Modified N4SID (auto order = k-1)
-│   ├── blkhank.m                  #   Block Hankel matrix builder
-│   └── create_prbs.m              #   PRBS signal generator
+├── src/                                     # Core algorithm
+│   ├── n4sidkatamodar_TC.m                  #   Modified N4SID (auto order)
+│   ├── blkhank.m                            #   Block Hankel matrix builder
+│   └── create_prbs.m                        #   PRBS signal generator
 │
-├── utils/                         # Plotting & analysis helpers
-│   ├── m_freq_resp_cal.m          #   Frequency response via spectral analysis
-│   ├── specCale.m                 #   FFT spectrum calculation
-│   ├── xbode.m                    #   Custom Bode plot
-│   └── xbodeplot.m                #   Multi-system Bode wrapper
+├── examples/                                # Runnable demos
+│   ├── validate_camera_ready_testn2.m       #   Paper figs: 1-sensor vs 2-sensor
+│   ├── validate_order_nmp.m                 #   Non-minimum-phase validation
+│   ├── models_multirate_data_example_2022b.slx   # Simulink model (NMP demo)
+│   └── models_multirate_data_example_2022b2.slx  # Simulink model (paper demo)
 │
-└── examples/                      # Runnable demos
-    ├── test_multirate_simple.m    #   Self-contained demo (no Simulink)
-    ├── camera_ready_test3.m       #   Paper figures: 1-sensor vs 2-sensor
-    ├── collabrative_sensing_peaks_two_sensor.m
-    ├── validate_order_comparison.m
-    ├── validate_order_nmp.m
-    ├── generate_test_data.m       #   Generates simulated DC motor data
-    └── multi_rate_cherry_may_16.m #   DC motor experiment analysis
+└── images/                                  # Figures for README
 ```
 
 ---
 
 ## Quick Start
+
+Requires **MATLAB R2022b+** with **Simulink**.
 
 ### 1. Setup paths
 
@@ -62,45 +91,21 @@ coprime_sensing_sys_id/
 >> setup_paths
 ```
 
-### 2. Run the self-contained demo
+### 2. Paper demo: one sensor vs two sensors
 
 ```matlab
->> test_multirate_simple
+>> validate_camera_ready_testn2
 ```
 
-This runs the full pipeline on a simulated 4th-order system -- no Simulink, no toolboxes, no external data needed.
+Generates Bode plots comparing a single slow sensor (fails beyond Nyquist) with two coprime sensors (succeeds).
 
-**Also works in GNU Octave:**
-
-```bash
-octave --no-gui --eval "pkg load control; pkg load signal; setup_paths; test_multirate_simple"
-```
-
-### 3. Full paper examples (require MATLAB + Simulink)
-
-The following scripts require the Simulink model `models_multirate_data_example_2022b.slx`:
-
-- `camera_ready_test3.m` -- main paper demo (1-sensor vs 2-sensor)
-- `collabrative_sensing_peaks_two_sensor.m` -- beyond-Nyquist peak identification
-- `validate_order_comparison.m` -- order-5 system validation
-- `validate_order_nmp.m` -- order-8 non-minimum-phase validation
-
-### 4. DC motor experiment
+### 3. Non-minimum-phase system validation
 
 ```matlab
->> generate_test_data           % create simulated motor data
->> multi_rate_cherry_may_16     % run multirate vs single-rate comparison
+>> validate_order_nmp
 ```
 
-Requires MATLAB System Identification Toolbox.
-
----
-
-## Requirements
-
-- **Self-contained demo:** MATLAB R2019b+ **or** GNU Octave 8.x (`control` + `signal` packages)
-- **Simulink examples:** MATLAB R2022b+ with Simulink
-- **DC motor demo:** MATLAB with System Identification Toolbox
+Tests the algorithm on an order-8 NMP system with random poles and non-minimum-phase zeros.
 
 ---
 
